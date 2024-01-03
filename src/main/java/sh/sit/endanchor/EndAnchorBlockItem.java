@@ -21,11 +21,6 @@ public class EndAnchorBlockItem extends BlockItem {
     }
 
     @Override
-    public void onCraft(ItemStack stack, World world) {
-        super.onCraft(stack, world);
-    }
-
-    @Override
     protected boolean postPlacement(BlockPos pos, World world, @Nullable PlayerEntity player, ItemStack stack, BlockState state) {
         super.postPlacement(pos, world, player, stack, state);
 

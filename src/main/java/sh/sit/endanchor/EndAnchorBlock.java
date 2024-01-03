@@ -97,6 +97,8 @@ public class EndAnchorBlock extends Block implements BlockEntityProvider {
             } else {
                 world.setBlockState(pos, state.with(CHARGED, false));
 
+                player.teleport(teleportTarget.x, teleportTarget.y, teleportTarget.z, true);
+
                 final MinecraftServer server = world.getServer();
                 if (server != null) {
                     final Vec3d centerBlockPos = pos.toCenterPos();
@@ -139,7 +141,6 @@ public class EndAnchorBlock extends Block implements BlockEntityProvider {
                             )
                     );
                 }
-                player.teleport(teleportTarget.x, teleportTarget.y, teleportTarget.z, true);
             }
 
             return ActionResult.SUCCESS;

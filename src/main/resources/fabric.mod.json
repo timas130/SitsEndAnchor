@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "endanchor",
+  "version": "${version}",
+  "name": "Sit's End Anchor",
+  "description": "Adds End Anchors that teleport you in the end",
+  "authors": [
+    "sitsh"
+  ],
+  "contact": {
+    "homepage": "https://sit.sh/end-anchor",
+    "repo": "https://github.com/timas130/SitsEndAnchor",
+    "issues": "https://github.com/timas130/SitsEndAnchor/issues"
+  },
+  "license": "GPL-3.0",
+  "icon": "assets/endanchor/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "sh.sit.endanchor.SitsEndAnchor"
+    ]
+  },
+  "mixins": [
+    "endanchor.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}

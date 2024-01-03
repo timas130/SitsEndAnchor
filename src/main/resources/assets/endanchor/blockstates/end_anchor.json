@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "charged=false": {"model": "endanchor:block/end_anchor"},
+    "charged=true": {"model": "endanchor:block/end_anchor_charged"}
+  }
+}

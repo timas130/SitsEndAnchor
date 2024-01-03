@@ -6,7 +6,7 @@ This mod adds a new block: the End Anchor, which allows you to teleport in the E
 
 ## Crafting
 
-<img alt="Crafting Recipe" height="128" src="screenshots/crafting.png">
+<img alt="Crafting Recipe" height="128" src="https://github.com/timas130/SitsEndAnchor/raw/master/screenshots/crafting.png">
 
 Four obsidian on the corners, four popped chorus fruit on the sides, and a lodestone compass pointing to a lodestone in the End.
 
@@ -14,7 +14,7 @@ Four obsidian on the corners, four popped chorus fruit on the sides, and a lodes
 
 ## Using the block
 
-<video height="256" autoplay controls src="screenshots/using.mp4"></video>
+https://github.com/timas130/SitsEndAnchor/raw/master/screenshots/using.mp4
 
 Before you teleport, charging the anchor is required. Right-click with an end crystal to do that.
 
@@ -25,7 +25,7 @@ If the lodestone is broken or obstructed, teleportation will fail.
 
 ## Breaking the block
 
-<img alt="Breaking without Silk Touch" height="256" src="screenshots/breaking.gif">
+<img alt="Breaking without Silk Touch" height="256" src="https://github.com/timas130/SitsEndAnchor/raw/master/screenshots/breaking.png">
 
 If broken without Silk Touch, only the lodestone compass is dropped.
 If the tool has Silk Touch, the whole block can be picked up.
@@ -34,11 +34,11 @@ Ender dragons cannot break the End Anchor.
 
 ## Redstone mechanics
 
-<img alt="Redstone mechanics demonstration" height="256" src="screenshots/redstone.png">
+<img alt="Redstone mechanics demonstration" height="256" src="https://github.com/timas130/SitsEndAnchor/raw/master/screenshots/redstone.png">
 
 When charged with an end crystal, the block outputs 15 redstone power through a comparator.
 
-<img alt="Dispenser demonstration" height="256" src="screenshots/dispenser.gif">
+<img alt="Dispenser demonstration" height="256" src="https://github.com/timas130/SitsEndAnchor/raw/master/screenshots/dispenser.gif">
 
 You can also point a dispenser with end crystals at the anchor and charge it using redstone!
 

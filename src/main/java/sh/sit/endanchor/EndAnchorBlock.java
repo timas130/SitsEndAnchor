@@ -112,7 +112,7 @@ public class EndAnchorBlock extends Block implements BlockEntityProvider {
                             30f,
                             world.getRegistryKey(),
                             new PlaySoundS2CPacket(
-                                    Registries.SOUND_EVENT.getEntry(SoundEvents.ENTITY_PLAYER_TELEPORT),
+                                    Registries.SOUND_EVENT.getEntry(SoundEvents.ENTITY_ENDERMAN_TELEPORT),
                                     SoundCategory.PLAYERS,
                                     centerBlockPos.x,
                                     centerBlockPos.y,
@@ -130,7 +130,7 @@ public class EndAnchorBlock extends Block implements BlockEntityProvider {
                             30f,
                             world.getRegistryKey(),
                             new PlaySoundS2CPacket(
-                                    Registries.SOUND_EVENT.getEntry(SoundEvents.ENTITY_PLAYER_TELEPORT),
+                                    Registries.SOUND_EVENT.getEntry(SoundEvents.ENTITY_ENDERMAN_TELEPORT),
                                     SoundCategory.PLAYERS,
                                     teleportTarget.x,
                                     teleportTarget.y,
@@ -167,7 +167,7 @@ public class EndAnchorBlock extends Block implements BlockEntityProvider {
         world.playSound(
                 null,
                 pos,
-                SoundEvents.ENTITY_PLAYER_TELEPORT,
+                SoundEvents.ENTITY_ENDERMAN_TELEPORT,
                 SoundCategory.PLAYERS,
                 1,
                 -2f
@@ -227,11 +227,11 @@ public class EndAnchorBlock extends Block implements BlockEntityProvider {
 
     public static void registerDispenserBehaviour() {
         DispenserBlock.registerBehavior(Items.END_CRYSTAL, (pointer, stack) -> {
-            final BlockPos targetBlock = pointer.pos().offset(pointer.state().get(DispenserBlock.FACING));
-            final BlockState targetState = pointer.world().getBlockState(targetBlock);
+            final BlockPos targetBlock = pointer.getPos().offset(pointer.getBlockState().get(DispenserBlock.FACING));
+            final BlockState targetState = pointer.getWorld().getBlockState(targetBlock);
 
             if (targetState.isOf(SitsEndAnchor.END_ANCHOR_BLOCK) && !targetState.get(CHARGED)) {
-                pointer.world().setBlockState(targetBlock, targetState.with(CHARGED, true));
+                pointer.getWorld().setBlockState(targetBlock, targetState.with(CHARGED, true));
                 stack.decrement(1);
             }
             return stack;

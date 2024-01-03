@@ -11,6 +11,7 @@ import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.SpecialCraftingRecipe;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
 import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.GlobalPos;
 import net.minecraft.world.World;
 
@@ -21,8 +22,8 @@ public class EndAnchorBlockCraftingRecipe extends SpecialCraftingRecipe {
             Items.OBSIDIAN, Items.POPPED_CHORUS_FRUIT, Items.OBSIDIAN
     };
 
-    public EndAnchorBlockCraftingRecipe(CraftingRecipeCategory category) {
-        super(category);
+    public EndAnchorBlockCraftingRecipe(Identifier id, CraftingRecipeCategory category) {
+        super(id, category);
     }
 
     @Override

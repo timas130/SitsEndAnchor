@@ -1,16 +1,15 @@
 package sh.sit.endanchor;
 
-import net.minecraft.inventory.RecipeInputInventory;
-import net.minecraft.item.CompassItem;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.LodestoneTrackerComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.SpecialCraftingRecipe;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
-import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.recipe.input.CraftingRecipeInput;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.GlobalPos;
 import net.minecraft.world.World;
 
@@ -26,49 +25,50 @@ public class EndAnchorBlockCraftingRecipe extends SpecialCraftingRecipe {
     }
 
     @Override
-    public boolean matches(RecipeInputInventory inventory, World world) {
+    public boolean matches(CraftingRecipeInput input, World world) {
         // require full-sized crafting table
-        if (inventory.size() != 9) {
+        if (input.getStackCount() != 9) {
             return false;
         }
 
         // check ingredients
         for (int i = 0; i < 9; i++) {
-            if (!inventory.getStack(i).isOf(INGREDIENTS[i])) {
+            if (!input.getStackInSlot(i).isOf(INGREDIENTS[i])) {
                 return false;
             }
         }
 
         // require compass to be a lodestone compass
-        final ItemStack lodestoneCompassStack = inventory.getStack(4);
-        final NbtCompound lodestoneCompassNbt = lodestoneCompassStack.getNbt();
-        if (lodestoneCompassNbt == null) {
+        final ItemStack lodestoneCompassStack = input.getStackInSlot(4);
+        final LodestoneTrackerComponent lodestoneTrackerComponent = lodestoneCompassStack.get(DataComponentTypes.LODESTONE_TRACKER);
+        if (lodestoneTrackerComponent == null) {
             return false;
         }
-        final GlobalPos lodestonePos = CompassItem.createLodestonePos(lodestoneCompassNbt);
+
+        final GlobalPos lodestonePos = lodestoneTrackerComponent.target().orElse(null);
         if (lodestonePos == null) {
             return false;
         }
         // ensure compass points to the end
-        return lodestonePos.getDimension() == World.END;
+        return lodestonePos.dimension() == World.END;
     }
 
     @Override
-    public ItemStack craft(RecipeInputInventory inventory, DynamicRegistryManager registryManager) {
+    public ItemStack craft(CraftingRecipeInput input, RegistryWrapper.WrapperLookup lookup) {
         // just in case?
-        if (!matches(inventory, null)) {
+        if (!matches(input, null)) {
             return ItemStack.EMPTY;
         }
 
-        final ItemStack lodestoneCompassStack = inventory.getStack(4);
-        final NbtCompound lodestoneCompassNbt = lodestoneCompassStack.getNbt();
-        assert lodestoneCompassNbt != null; // checked in matches()
-        final GlobalPos lodestonePos = CompassItem.createLodestonePos(lodestoneCompassNbt);
+        final ItemStack lodestoneCompassStack = input.getStackInSlot(4);
+        final LodestoneTrackerComponent lodestoneTrackerComponent = lodestoneCompassStack.get(DataComponentTypes.LODESTONE_TRACKER);
+        assert lodestoneTrackerComponent != null; // checked in matches()
+
+        final GlobalPos lodestonePos = lodestoneTrackerComponent.target().orElse(null);
         assert lodestonePos != null; // checked in matches()
 
         final ItemStack result = new ItemStack(SitsEndAnchor.END_ANCHOR_BLOCK_ITEM);
-        final NbtCompound resultNbt = result.getOrCreateNbt();
-        resultNbt.put(EndAnchorBlockItem.LODESTONE_POS_KEY, NbtHelper.fromBlockPos(lodestonePos.getPos()));
+        result.set(DataComponentTypes.LODESTONE_TRACKER, lodestoneTrackerComponent);
 
         return result;
     }

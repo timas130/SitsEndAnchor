@@ -1,23 +1,23 @@
 package sh.sit.endanchor;
 
-import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.block.BlockState;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.LodestoneTrackerComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.GlobalPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class EndAnchorBlockItem extends BlockItem {
-    public static final String LODESTONE_POS_KEY = "LodestonePos";
-
     public EndAnchorBlockItem() {
-        super(SitsEndAnchor.END_ANCHOR_BLOCK, new FabricItemSettings());
+        super(SitsEndAnchor.END_ANCHOR_BLOCK, new BlockItem.Settings()
+                .component(DataComponentTypes.LODESTONE_TRACKER, new LodestoneTrackerComponent(Optional.empty(), false)));
     }
 
     @Override
@@ -28,11 +28,14 @@ public class EndAnchorBlockItem extends BlockItem {
             return false;
         }
 
-        final NbtCompound stackNbt = Objects.requireNonNull(stack.getNbt());
-        final BlockPos lodestonePos = NbtHelper.toBlockPos(stackNbt.getCompound(LODESTONE_POS_KEY));
+        final LodestoneTrackerComponent lodestoneTrackerComponent =
+                Objects.requireNonNull(stack.get(DataComponentTypes.LODESTONE_TRACKER));
+        final GlobalPos lodestonePos = lodestoneTrackerComponent.target().orElse(null);
 
-        final EndAnchorBlockEntity blockEntity = (EndAnchorBlockEntity) world.getBlockEntity(pos);
-        Objects.requireNonNull(blockEntity).setLodestonePos(lodestonePos);
+        if (lodestonePos != null) {
+            final EndAnchorBlockEntity blockEntity = (EndAnchorBlockEntity) world.getBlockEntity(pos);
+            Objects.requireNonNull(blockEntity).setLodestonePos(lodestonePos.pos());
+        }
 
         return true;
     }

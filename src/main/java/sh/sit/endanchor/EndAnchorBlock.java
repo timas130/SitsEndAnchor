@@ -1,32 +1,34 @@
 package sh.sit.endanchor;
 
-import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.LodestoneTrackerComponent;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Dismounting;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.CompassItem;
 import net.minecraft.item.EndCrystalItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ItemActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.GlobalPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionTypes;
@@ -35,12 +37,13 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class EndAnchorBlock extends Block implements BlockEntityProvider {
     public static final BooleanProperty CHARGED = BooleanProperty.of("charged");
 
     public EndAnchorBlock() {
-        super(FabricBlockSettings.create()
+        super(AbstractBlock.Settings.create()
                 .strength(4f)
                 .luminance(blockState -> blockState.get(CHARGED) ? 10 : 0));
 
@@ -54,16 +57,20 @@ public class EndAnchorBlock extends Block implements BlockEntityProvider {
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+    protected ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         // charge the anchor if holding end crystal
-        final ItemStack handContents = player.getStackInHand(hand);
-        if (handContents.getItem() instanceof EndCrystalItem && !state.get(CHARGED)) {
+        if (stack.getItem() instanceof EndCrystalItem && !state.get(CHARGED)) {
+            // don't charge if the player is not allowed to modify world
+            if (!player.getAbilities().allowModifyWorld) {
+                return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            }
+
             world.setBlockState(pos, state.with(CHARGED, true));
             player.playSound(SoundEvents.BLOCK_RESPAWN_ANCHOR_CHARGE, 1, 1);
             if (!player.getAbilities().creativeMode) {
-                handContents.decrement(1);
+                stack.decrementUnlessCreative(1, player);
             }
-            return ActionResult.success(world.isClient);
+            return ItemActionResult.success(world.isClient);
         }
 
         // if not the end, explode
@@ -72,13 +79,13 @@ public class EndAnchorBlock extends Block implements BlockEntityProvider {
                 explode(state, world, pos);
             }
 
-            return ActionResult.success(world.isClient);
+            return ItemActionResult.success(world.isClient);
         }
 
         // if charged and not holding end crystal
         if (state.get(CHARGED)) {
             if (world.isClient) {
-                return ActionResult.SUCCESS;
+                return ItemActionResult.SUCCESS;
             }
 
             final EndAnchorBlockEntity blockEntity = (EndAnchorBlockEntity) world.getBlockEntity(pos);
@@ -86,7 +93,7 @@ public class EndAnchorBlock extends Block implements BlockEntityProvider {
 
             if (world.getBlockState(lodestonePos).getBlock() != Blocks.LODESTONE) {
                 playErrorSound(world, pos);
-                return ActionResult.SUCCESS;
+                return ItemActionResult.SUCCESS;
             }
 
             final BlockPos spawnPos = lodestonePos.add(0, 1, 0);
@@ -143,10 +150,10 @@ public class EndAnchorBlock extends Block implements BlockEntityProvider {
                 }
             }
 
-            return ActionResult.SUCCESS;
+            return ItemActionResult.SUCCESS;
         }
 
-        return ActionResult.PASS;
+        return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
     private static void explode(BlockState state, World world, BlockPos pos) {
@@ -182,28 +189,23 @@ public class EndAnchorBlock extends Block implements BlockEntityProvider {
         final ItemStack tool = builder.getOptional(LootContextParameters.TOOL);
         if (tool == null) return super.getDroppedStacks(state, builder);
 
-        final NbtCompound lodestonePos = NbtHelper.fromBlockPos(blockEntity.getLodestonePos());
+        final GlobalPos lodestonePos = new GlobalPos(World.END, blockEntity.getLodestonePos());
+        final LodestoneTrackerComponent lodestoneTrackerComponent =
+                new LodestoneTrackerComponent(Optional.of(lodestonePos), true);
 
-        if (EnchantmentHelper.hasSilkTouch(tool)) {
+        final RegistryEntry<Enchantment> silkTouchEnchantment = builder.getWorld()
+                .getRegistryManager()
+                .getWrapperOrThrow(RegistryKeys.ENCHANTMENT)
+                .getOrThrow(Enchantments.SILK_TOUCH);
+
+        if (EnchantmentHelper.getLevel(silkTouchEnchantment, tool) >= 1) {
             final ItemStack droppedStack = new ItemStack(SitsEndAnchor.END_ANCHOR_BLOCK_ITEM);
-            final NbtCompound droppedStackNbt = droppedStack.getOrCreateNbt();
-            droppedStackNbt.put(EndAnchorBlockItem.LODESTONE_POS_KEY, lodestonePos);
+            droppedStack.set(DataComponentTypes.LODESTONE_TRACKER, lodestoneTrackerComponent);
 
             return Collections.singletonList(droppedStack);
         } else {
             final ItemStack droppedStack = new ItemStack(Items.COMPASS);
-            final NbtCompound droppedStackNbt = droppedStack.getOrCreateNbt();
-            droppedStackNbt.putBoolean(CompassItem.LODESTONE_TRACKED_KEY, true);
-            droppedStackNbt.put(CompassItem.LODESTONE_POS_KEY, lodestonePos);
-            // dramatic!
-            // (simply writes the world name)
-            World.CODEC
-                    // .getWorld() only returns null during world gen, so it's never null in this case
-                    .encodeStart(NbtOps.INSTANCE, Objects.requireNonNull(blockEntity.getWorld()).getRegistryKey())
-                    .result()
-                    .ifPresent((nbtElement) -> {
-                        droppedStackNbt.put(CompassItem.LODESTONE_DIMENSION_KEY, nbtElement);
-                    });
+            droppedStack.set(DataComponentTypes.LODESTONE_TRACKER, lodestoneTrackerComponent);
 
             return Collections.singletonList(droppedStack);
         }

@@ -23,6 +23,7 @@
   "mixins": [
     "endanchor.mixins.json"
   ],
+  "accessWidener": "endanchor.accesswidener",
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric": "*",

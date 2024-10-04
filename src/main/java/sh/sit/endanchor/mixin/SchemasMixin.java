@@ -9,7 +9,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import sh.sit.endanchor.EndAnchorBlockPosFormatFix;
 
 import java.util.function.BiFunction;
@@ -18,7 +17,7 @@ import java.util.function.BiFunction;
 public class SchemasMixin {
     @Shadow @Final private static BiFunction<Integer, Schema, Schema> EMPTY_IDENTIFIER_NORMALIZE;
 
-    @Inject(at = @At(value = "NEW", shift = At.Shift.BY, by = 5, target = "(Lcom/mojang/datafixers/schemas/Schema;)Lnet/minecraft/datafixer/fix/BlockPosFormatFix;"), method = "build", locals = LocalCapture.CAPTURE_FAILHARD)
+    @Inject(at = @At(value = "NEW", shift = At.Shift.BY, by = 5, target = "(Lcom/mojang/datafixers/schemas/Schema;)Lnet/minecraft/datafixer/fix/BlockPosFormatFix;"), method = "build")
     private static void build(DataFixerBuilder builder, CallbackInfo ci) {
         Schema schema = builder.addSchema(3813, 1, EMPTY_IDENTIFIER_NORMALIZE);
         builder.addFixer(new EndAnchorBlockPosFormatFix(schema));

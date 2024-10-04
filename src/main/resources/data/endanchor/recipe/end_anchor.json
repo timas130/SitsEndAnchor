@@ -1,4 +1,20 @@
 {
   "type": "endanchor:end_anchor_recipe",
-  "category": "blocks"
+  "category": "blocks",
+  "pattern": [
+    "121",
+    "232",
+    "121"
+  ],
+  "key": {
+    "1": {
+      "item": "minecraft:popped_chorus_fruit"
+    },
+    "2": {
+      "item": "minecraft:obsidian"
+    },
+    "3": {
+      "item": "minecraft:compass"
+    }
+  }
 }

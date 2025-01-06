@@ -3,7 +3,6 @@ package sh.sit.endanchor;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.fabricmc.loader.impl.util.log.Log;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.LodestoneTrackerComponent;
 import net.minecraft.item.ItemStack;
@@ -21,8 +20,12 @@ import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.GlobalPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EndAnchorBlockCraftingRecipe implements CraftingRecipe {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EndAnchorBlockCraftingRecipe.class);
+
     final String group;
     final CraftingRecipeCategory category;
     final RawShapedRecipe raw;
@@ -65,7 +68,7 @@ public class EndAnchorBlockCraftingRecipe implements CraftingRecipe {
             final ItemStack stack = input.getStackInSlot(i);
             if (stack.isOf(Items.COMPASS) && stack.get(DataComponentTypes.LODESTONE_TRACKER) != null) {
                 if (lodestoneCompassStack != null) {
-                    Log.info(SitsEndAnchor.LOG_CATEGORY, "Invalid end anchor recipe: multiple lodestone compasses");
+                    LOGGER.info("Invalid end anchor recipe: multiple lodestone compasses");
                     return null;
                 }
                 lodestoneCompassStack = stack;
@@ -73,7 +76,7 @@ public class EndAnchorBlockCraftingRecipe implements CraftingRecipe {
         }
 
         if (lodestoneCompassStack == null) {
-            Log.info(SitsEndAnchor.LOG_CATEGORY, "Invalid end anchor recipe: no lodestone compass");
+            LOGGER.info("Invalid end anchor recipe: no lodestone compass");
             return null;
         }
 

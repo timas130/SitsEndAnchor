@@ -6,6 +6,9 @@ import net.minecraft.component.type.LodestoneTrackerComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.GlobalPos;
 import net.minecraft.world.World;
@@ -17,6 +20,7 @@ import java.util.Optional;
 public class EndAnchorBlockItem extends BlockItem {
     public EndAnchorBlockItem() {
         super(SitsEndAnchor.END_ANCHOR_BLOCK, new BlockItem.Settings()
+                .registryKey(RegistryKey.of(RegistryKeys.ITEM, Identifier.of("endanchor", "end_anchor")))
                 .component(DataComponentTypes.LODESTONE_TRACKER, new LodestoneTrackerComponent(Optional.empty(), false)));
     }
 

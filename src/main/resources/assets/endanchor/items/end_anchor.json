@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "endanchor:block/end_anchor"
+  }
+}

@@ -13,10 +13,11 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.EndCrystalItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
+import net.minecraft.loot.context.LootWorldContext;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.MinecraftServer;
@@ -24,8 +25,9 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.ItemActionResult;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.GlobalPos;
@@ -44,6 +46,7 @@ public class EndAnchorBlock extends Block implements BlockEntityProvider {
 
     public EndAnchorBlock() {
         super(AbstractBlock.Settings.create()
+                .registryKey(RegistryKey.of(RegistryKeys.BLOCK, Identifier.of("endanchor", "end_anchor")))
                 .strength(4f)
                 .luminance(blockState -> blockState.get(CHARGED) ? 10 : 0));
 
@@ -57,12 +60,12 @@ public class EndAnchorBlock extends Block implements BlockEntityProvider {
     }
 
     @Override
-    protected ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+    protected ActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         // charge the anchor if holding end crystal
         if (stack.getItem() instanceof EndCrystalItem && !state.get(CHARGED)) {
             // don't charge if the player is not allowed to modify world
             if (!player.getAbilities().allowModifyWorld) {
-                return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+                return ActionResult.PASS_TO_DEFAULT_BLOCK_ACTION;
             }
 
             world.setBlockState(pos, state.with(CHARGED, true));
@@ -70,7 +73,7 @@ public class EndAnchorBlock extends Block implements BlockEntityProvider {
             if (!player.getAbilities().creativeMode) {
                 stack.decrementUnlessCreative(1, player);
             }
-            return ItemActionResult.success(world.isClient);
+            return ActionResult.SUCCESS;
         }
 
         // if not the end, explode
@@ -79,13 +82,13 @@ public class EndAnchorBlock extends Block implements BlockEntityProvider {
                 explode(state, world, pos);
             }
 
-            return ItemActionResult.success(world.isClient);
+            return ActionResult.SUCCESS;
         }
 
         // if charged and not holding end crystal
         if (state.get(CHARGED)) {
             if (world.isClient) {
-                return ItemActionResult.SUCCESS;
+                return ActionResult.SUCCESS;
             }
 
             final EndAnchorBlockEntity blockEntity = (EndAnchorBlockEntity) world.getBlockEntity(pos);
@@ -93,7 +96,7 @@ public class EndAnchorBlock extends Block implements BlockEntityProvider {
 
             if (world.getBlockState(lodestonePos).getBlock() != Blocks.LODESTONE) {
                 playErrorSound(world, pos);
-                return ItemActionResult.SUCCESS;
+                return ActionResult.SUCCESS;
             }
 
             final BlockPos spawnPos = lodestonePos.add(0, 1, 0);
@@ -150,10 +153,10 @@ public class EndAnchorBlock extends Block implements BlockEntityProvider {
                 }
             }
 
-            return ItemActionResult.SUCCESS;
+            return ActionResult.SUCCESS;
         }
 
-        return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        return ActionResult.PASS_TO_DEFAULT_BLOCK_ACTION;
     }
 
     private static void explode(BlockState state, World world, BlockPos pos) {
@@ -182,7 +185,7 @@ public class EndAnchorBlock extends Block implements BlockEntityProvider {
     }
 
     @Override
-    public List<ItemStack> getDroppedStacks(BlockState state, LootContextParameterSet.Builder builder) {
+    public List<ItemStack> getDroppedStacks(BlockState state, LootWorldContext.Builder builder) {
         final EndAnchorBlockEntity blockEntity = (EndAnchorBlockEntity) builder.getOptional(LootContextParameters.BLOCK_ENTITY);
         if (blockEntity == null) return super.getDroppedStacks(state, builder);
 
@@ -195,7 +198,7 @@ public class EndAnchorBlock extends Block implements BlockEntityProvider {
 
         final RegistryEntry<Enchantment> silkTouchEnchantment = builder.getWorld()
                 .getRegistryManager()
-                .getWrapperOrThrow(RegistryKeys.ENCHANTMENT)
+                .getOrThrow(RegistryKeys.ENCHANTMENT)
                 .getOrThrow(Enchantments.SILK_TOUCH);
 
         if (EnchantmentHelper.getLevel(silkTouchEnchantment, tool) >= 1) {

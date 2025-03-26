@@ -9,19 +9,20 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.recipe.CraftingRecipe;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.recipe.RawShapedRecipe;
-import net.minecraft.recipe.RecipeSerializer;
+import net.minecraft.recipe.*;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
+import net.minecraft.recipe.display.RecipeDisplay;
+import net.minecraft.recipe.display.ShapedCraftingRecipeDisplay;
+import net.minecraft.recipe.display.SlotDisplay;
 import net.minecraft.recipe.input.CraftingRecipeInput;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.GlobalPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 public class EndAnchorBlockCraftingRecipe implements CraftingRecipe {
     private static final Logger LOGGER = LoggerFactory.getLogger(EndAnchorBlockCraftingRecipe.class);
@@ -64,7 +65,7 @@ public class EndAnchorBlockCraftingRecipe implements CraftingRecipe {
 
     private static @Nullable ItemStack findLodestoneCompass(CraftingRecipeInput input) {
         ItemStack lodestoneCompassStack = null;
-        for (int i = 0; i < input.getSize(); i++) {
+        for (int i = 0; i < input.size(); i++) {
             final ItemStack stack = input.getStackInSlot(i);
             if (stack.isOf(Items.COMPASS) && stack.get(DataComponentTypes.LODESTONE_TRACKER) != null) {
                 if (lodestoneCompassStack != null) {
@@ -105,18 +106,13 @@ public class EndAnchorBlockCraftingRecipe implements CraftingRecipe {
     }
 
     @Override
-    public boolean fits(int width, int height) {
-        return width >= raw.getHeight() && height >= raw.getHeight();
-    }
-
-    @Override
-    public ItemStack getResult(RegistryWrapper.WrapperLookup registriesLookup) {
-        return new ItemStack(SitsEndAnchor.END_ANCHOR_BLOCK_ITEM);
-    }
-
-    @Override
     public RecipeSerializer<EndAnchorBlockCraftingRecipe> getSerializer() {
         return SitsEndAnchor.END_ANCHOR_BLOCK_CRAFTING_RECIPE;
+    }
+
+    @Override
+    public IngredientPlacement getIngredientPlacement() {
+        return IngredientPlacement.forMultipleSlots(raw.getIngredients());
     }
 
     @Override
@@ -125,13 +121,28 @@ public class EndAnchorBlockCraftingRecipe implements CraftingRecipe {
     }
 
     @Override
+    public String getGroup() {
+        return group;
+    }
+
+    @Override
     public boolean showNotification() {
         return showNotification;
     }
 
     @Override
-    public DefaultedList<Ingredient> getIngredients() {
-        return raw.getIngredients();
+    public List<RecipeDisplay> getDisplays() {
+        return List.of(new ShapedCraftingRecipeDisplay(this.raw.getWidth(),
+                this.raw.getHeight(),
+                this.raw.getIngredients()
+                        .stream()
+                        .map((ingredient) -> ingredient
+                                .map(Ingredient::toDisplay)
+                                .orElse(SlotDisplay.EmptySlotDisplay.INSTANCE))
+                        .toList(),
+                new SlotDisplay.StackSlotDisplay(new ItemStack(SitsEndAnchor.END_ANCHOR_BLOCK_ITEM)),
+                new SlotDisplay.ItemSlotDisplay(Items.CRAFTING_TABLE)
+        ));
     }
 
     public static class Serializer implements RecipeSerializer<EndAnchorBlockCraftingRecipe> {

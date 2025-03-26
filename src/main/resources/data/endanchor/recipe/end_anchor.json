@@ -7,14 +7,8 @@
     "121"
   ],
   "key": {
-    "1": {
-      "item": "minecraft:obsidian"
-    },
-    "2": {
-      "item": "minecraft:popped_chorus_fruit"
-    },
-    "3": {
-      "item": "minecraft:compass"
-    }
+    "1": "minecraft:obsidian",
+    "2": "minecraft:popped_chorus_fruit",
+    "3": "minecraft:compass"
   }
 }

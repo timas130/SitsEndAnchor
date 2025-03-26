@@ -1,5 +1,6 @@
 package sh.sit.endanchor;
 
+import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.schemas.Schema;
@@ -22,10 +23,12 @@ public class EndAnchorBlockPosFormatFix extends DataFix {
                 ItemNbtFix.fixNbt(type,
                         "endanchor:end_anchor"::equals,
                         tagDynamic -> tagDynamic
-                                .update("LodestonePos", FixUtil::fixBlockPos)
-                                // dimension is ignored, so it's probably ok to just hardcode it?
-                                // this is such a hack
-                                .set("LodestoneDimension", tagDynamic.createString("minecraft:the_end"))
+                                .update(DSL.remainderFinder(), (dynamic) -> dynamic
+                                        .update("LodestonePos", FixUtil::fixBlockPos)
+                                        // dimension is ignored, so it's probably ok to just hardcode it?
+                                        // this is such a hack
+                                        .set("LodestoneDimension", dynamic.createString("minecraft:the_end"))
+                                )
                 )
         );
     }

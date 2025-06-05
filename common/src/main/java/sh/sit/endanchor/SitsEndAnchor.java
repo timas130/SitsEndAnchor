@@ -8,6 +8,8 @@ import net.minecraft.item.Item;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.registry.RegistryKeys;
 
+import java.util.Set;
+
 public class SitsEndAnchor {
     public static final String MOD_ID = "endanchor";
 
@@ -24,7 +26,7 @@ public class SitsEndAnchor {
     public static final RegistrySupplier<BlockEntityType<EndAnchorBlockEntity>> END_ANCHOR_BLOCK_ENTITY =
             BLOCK_ENTITIES.register(
                     "end_anchor_block_entity",
-                    () -> BlockEntityType.Builder.create(EndAnchorBlockEntity::new, END_ANCHOR_BLOCK.get()).build(null)
+                    () -> new BlockEntityType<>(EndAnchorBlockEntity::new, Set.of(END_ANCHOR_BLOCK.get()))
             );
     public static final RegistrySupplier<Item> END_ANCHOR_BLOCK_ITEM =
             ITEMS.register(

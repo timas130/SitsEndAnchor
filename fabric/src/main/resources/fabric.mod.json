@@ -17,16 +17,16 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "sh.sit.endanchor.SitsEndAnchor"
+      "sh.sit.endanchor.fabric.FabricSitsEndAnchor"
     ]
   },
   "mixins": [
     "endanchor.mixins.json"
   ],
-  "accessWidener": "endanchor.accesswidener",
   "depends": {
-    "fabricloader": ">=${loader_version}",
-    "fabric": "*",
-    "minecraft": "${minecraft_version}"
+    "fabricloader": ">=0.16.14",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "architectury": ">=13.0.8"
   }
 }

@@ -16,7 +16,7 @@ import java.util.Optional;
 
 public class EndAnchorBlockItem extends BlockItem {
     public EndAnchorBlockItem() {
-        super(SitsEndAnchor.END_ANCHOR_BLOCK, new BlockItem.Settings()
+        super(SitsEndAnchor.END_ANCHOR_BLOCK.get(), new BlockItem.Settings()
                 .component(DataComponentTypes.LODESTONE_TRACKER, new LodestoneTrackerComponent(Optional.empty(), false)));
     }
 
